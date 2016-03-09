@@ -257,7 +257,7 @@ void warpImages(const vector<Mat> &Images, const vector<Mat> &masks_warped, cons
 	vector<Mat> Images_out(num_images);
 
 	for (int i = 0; i < num_images; i++) {
-		warpPerspective(Images[i],Images_out[i],transforms[i],panorama.size(), BORDER_CONSTANT,1);
+		warpPerspective(Images[i],Images_out[i],transforms[i],panorama.size(), INTER_LINEAR, BORDER_CONSTANT,1);
 		Images_out[i].copyTo(panorama,masks_warped[i]);
 	}
 	imwrite("panorma_warped.jpg", panorama);
@@ -277,7 +277,7 @@ void BlendImages(const vector<Mat> &Images, Mat &pano_feather, Mat &pano_multiba
 
 	for (int i = 0; i < Images.size(); i++) {
 		Mat image_warped;
-		warpPerspective(Images[i], image_warped, transforms[i], pano_feather.size(), BORDER_CONSTANT, 1);
+		warpPerspective(Images[i], image_warped, transforms[i], pano_feather.size(), INTER_LINEAR, BORDER_CONSTANT, 1);
 		image_warped.convertTo(image_warped, CV_16S);
 		f_blend.feed(image_warped, masks_warped[i], Point(0, 0));
 		mb_blend.feed(image_warped, masks_warped[i], Point(0, 0));
