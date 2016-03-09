@@ -19,7 +19,7 @@ int main()
 	initModule_nonfree();
 
 	// Set the dir/name of each image 
-	const int NUM_IMAGES = 2;
+	const int NUM_IMAGES = 6;
 	const string IMG_NAMES[] = { "FieldB09.JPG", "FieldB10.JPG", "FieldB11.JPG","FieldC09.JPG", "FieldC10.JPG", "FieldC11.JPG" };
 	//const string IMG_NAMES[] = { "img1.jpg", "img2.jpg", "img3.jpg", "img4.jpg", "img5.jpg", "img6.jpg" };
 
@@ -273,11 +273,11 @@ void BlendImages(const vector<Mat> &Images, Mat &pano_feather, Mat &pano_multiba
 	detail::MultiBandBlender mb_blend;
 
 	f_blend.prepare(Rect(0, 0, pano_feather.cols, pano_feather.rows));
-	mb_blend.prepare(Rect(0, 0, pano_multiband.cols, pano_multiband.rows));
+	mb_blend.prepare(Rect(0, 0, pano_feather.cols, pano_feather.rows));
 
 	for (int i = 0; i < Images.size(); i++) {
 		Mat image_warped;
-		warpPerspective(Images[i], image_warped, transforms[i], pano_multiband.size(), BORDER_CONSTANT, 1);
+		warpPerspective(Images[i], image_warped, transforms[i], pano_feather.size(), BORDER_CONSTANT, 1);
 		image_warped.convertTo(image_warped, CV_16S);
 		f_blend.feed(image_warped, masks_warped[i], Point(0, 0));
 		mb_blend.feed(image_warped, masks_warped[i], Point(0, 0));
@@ -286,12 +286,10 @@ void BlendImages(const vector<Mat> &Images, Mat &pano_feather, Mat &pano_multiba
 	Mat mb_empty = Mat::zeros(pano_multiband.size(), CV_8U);
 
 	f_blend.blend(pano_feather, f_empty);
-	f_blend.blend(pano_multiband, mb_empty);
+	mb_blend.blend(pano_multiband, mb_empty);
 	pano_feather.convertTo(pano_feather, CV_8U);
 	pano_multiband.convertTo(pano_multiband, CV_8U);
 
 	imwrite("pano_feather.jpg", pano_feather);	
 	imwrite("pano_multiband.jpg", pano_multiband);
-
-
 }
