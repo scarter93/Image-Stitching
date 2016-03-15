@@ -21,7 +21,8 @@ int main()
 	// Set the dir/name of each image 
 	const int NUM_IMAGES = 6;
 	//const string IMG_NAMES[] = { "FieldB09.JPG", "FieldB10.JPG", "FieldB11.JPG","FieldC09.JPG", "FieldC10.JPG", "FieldC11.JPG" };
-	const string IMG_NAMES[] = { "img1.jpg", "img2.jpg", "img3.jpg", "img4.jpg", "img5.jpg", "img6.jpg" };
+	//const string IMG_NAMES[] = { "img1.jpg", "img2.jpg", "img3.jpg", "img4.jpg", "img5.jpg", "img6.jpg" };
+	const string IMG_NAMES[] = { "img1.jpg", "img6.jpg", "img5.jpg", "img2.jpg", "img3.jpg", "img4.jpg" };
 
 	// Load the images
 	vector<Mat> Images;
@@ -160,6 +161,9 @@ void Homography(const vector<Mat> &Images, vector<Mat> &transforms)
 
 		//transforms[i] = findHomography(first, transforms[0], RANSAC);
 	}
+
+	Mat transform_extra = transforms[0] * transforms[5];
+	std::cout << transform_extra << endl;
 	for (int i = 1; i < num_images; i++) {
 		transforms[i] = transforms[i-1] * transforms[i];
 		//std:ostringstream os;
@@ -168,6 +172,7 @@ void Homography(const vector<Mat> &Images, vector<Mat> &transforms)
 	}
 	std::cout << transforms[5] << endl;
 	
+
 }
 
 
@@ -231,7 +236,7 @@ void FindOutputLimits(const vector<Mat> &Images, vector<Mat> &transforms, int &x
 	for (int i = 0; i < num_images; i++) {
 		transforms[i] = trans * transforms[i];
 	}
-
+	cout << trans << endl;
 	printf("[xMin xMax yMin yMax] = [%d, %d, %d, %d]\n", xMin, xMax, yMin, yMax);
 }
 
