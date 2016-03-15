@@ -20,8 +20,8 @@ int main()
 
 	// Set the dir/name of each image 
 	const int NUM_IMAGES = 6;
-	const string IMG_NAMES[] = { "FieldB09.JPG", "FieldB10.JPG", "FieldB11.JPG","FieldC09.JPG", "FieldC10.JPG", "FieldC11.JPG" };
-	//const string IMG_NAMES[] = { "img1.jpg", "img2.jpg", "img3.jpg", "img4.jpg", "img5.jpg", "img6.jpg" };
+	//const string IMG_NAMES[] = { "FieldB09.JPG", "FieldB10.JPG", "FieldB11.JPG","FieldC09.JPG", "FieldC10.JPG", "FieldC11.JPG" };
+	const string IMG_NAMES[] = { "img1.jpg", "img2.jpg", "img3.jpg", "img4.jpg", "img5.jpg", "img6.jpg" };
 
 	// Load the images
 	vector<Mat> Images;
@@ -130,9 +130,9 @@ void Homography(const vector<Mat> &Images, vector<Mat> &transforms)
 		desc_matcher->match(current_d_first, current_d_sec, match_data);
 		drawMatches(Images[i], store_kp_first, Images[i - 1], store_kp_sec, match_data, image_out, DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
 
-		/*std:ostringstream os;
+		std:ostringstream os;
 		os << "Dmatched_image_" << i << ".jpg";
-		imwrite(os.str(), image_out);*/
+		imwrite(os.str(), image_out);
 
 		double min_dist = DBL_MAX;
 
@@ -141,7 +141,7 @@ void Homography(const vector<Mat> &Images, vector<Mat> &transforms)
 			if (distance < min_dist)
 				min_dist = distance;
 		}
-		min_dist *= 2;
+		min_dist *= 3.2;
 		match_data.erase(
 			std::remove_if(
 				match_data.begin(), match_data.end(),
@@ -162,13 +162,15 @@ void Homography(const vector<Mat> &Images, vector<Mat> &transforms)
 	}
 	for (int i = 1; i < num_images; i++) {
 		transforms[i] = transforms[i-1] * transforms[i];
-		/*std:ostringstream os;
-		os << "transforms_" << i << ".jpg";
-		imwrite(os.str(), transforms[i]);*/
+		//std:ostringstream os;
+		
+		//imwrite(os.str(), transforms[i]);*/
 	}
-
+	std::cout << transforms[5] << endl;
 	
 }
+
+
 
 void FindOutputLimits(const vector<Mat> &Images, vector<Mat> &transforms, int &xMin, int &xMax, int &yMin, int &yMax)
 {
@@ -206,6 +208,7 @@ void FindOutputLimits(const vector<Mat> &Images, vector<Mat> &transforms, int &x
 			corn.at<double>(0, 0) = corners[j].at<double>(0, 0);
 			corn.at<double>(1, 0) = corners[j].at<double>(1, 0);
 			proj = transforms[i] * corn;
+			proj /= proj.at<double>(2,0);
 			if (proj.at<double>(0, 0) > xMax) {
 				xMax = proj.at<double>(0, 0);
 			}
@@ -259,11 +262,14 @@ void warpImages(const vector<Mat> &Images, const vector<Mat> &masks_warped, cons
 	for (int i = 0; i < num_images; i++) {
 		warpPerspective(Images[i],Images_out[i],transforms[i],panorama.size(), INTER_LINEAR, BORDER_CONSTANT,1);
 		Images_out[i].copyTo(panorama,masks_warped[i]);
+		std::ostringstream os;
+		os << "warped_image_" << i << ".jpg";
+		imwrite(os.str(), Images_out[i]);
 	}
 	imwrite("panorma_warped.jpg", panorama);
 	//imshow("image", panorama);
 	waitKey(1);
-	system("pause");
+	//system("pause");
 
 }
 
@@ -277,7 +283,7 @@ void BlendImages(const vector<Mat> &Images, Mat &pano_feather, Mat &pano_multiba
 
 	for (int i = 0; i < Images.size(); i++) {
 		Mat image_warped;
-		warpPerspective(Images[i], image_warped, transforms[i], pano_feather.size(), INTER_LINEAR, BORDER_CONSTANT, 1);
+		warpPerspective(Images[i], image_warped, transforms[i], pano_feather.size(), INTER_LINEAR, BORDER_REPLICATE, 1);
 		image_warped.convertTo(image_warped, CV_16S);
 		f_blend.feed(image_warped, masks_warped[i], Point(0, 0));
 		mb_blend.feed(image_warped, masks_warped[i], Point(0, 0));
